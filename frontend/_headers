@@ -1,0 +1,15 @@
+# Cloudflare Pages レスポンスヘッダー
+
+# 配布する CSS は他サイトからの利用と長期キャッシュを許可する
+/akizakura.css
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=86400
+/src/akizakura.css
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=86400
+
+# LLM 向けガイドは Markdown として配信する
+/llms.txt
+  Content-Type: text/markdown; charset=utf-8
+/llms-full.txt
+  Content-Type: text/markdown; charset=utf-8

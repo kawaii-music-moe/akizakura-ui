@@ -1,0 +1,241 @@
+# Akizakura — LLM 利用ガイド（完全版）
+
+Akizakura は kawaii-music.moe のデザイン規則を 1 枚の CSS にまとめた軽量 UI フレームワーク。
+このファイルは、生成 AI がこのフレームワークで**正しいマークアップを生成する**ための完全リファレンス。
+HTML にクラスを当てるだけで使える。JS は不要。
+
+================================================================
+1. 読み込み方
+================================================================
+
+フォント（IBM Plex Sans JP）はこの CSS に含まれない。利用側 HTML の <head> で読み込む。
+アイコンを使う場合は Material Symbols Outlined も読み込む（任意）。
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
+    <link rel="stylesheet" href="https://akizakura.pages.dev/akizakura.css">
+
+================================================================
+2. 最優先の設計原則（必ず守る）
+================================================================
+
+1. カードをネストさせない。カードの中にカードを置かない。階層化したくなったら、
+   内側のカードを外して「見出し + 本文」に並べ直すか、別セクションに分ける。
+2. 区切る線（border / hr / 下線）は最小限。情報の区切りはまず余白（gap）で表現する。
+   「線を引きたい」と思ったら、先に「余白を増やして解決できないか」を考える。
+3. 区切りは並び・近接・余白から感じさせる。線や塗りは補助。
+4. 縦方向の間隔は margin を積まない。親要素の gap（.stack / .card / .list）で取る。
+5. 色・余白・角丸は必ず CSS 変数（トークン）経由で参照する。生の値（#hex / px）を直書きしない。
+6. インラインのアイコン↔文字の隙間は em（0.2〜0.5em）。レイアウトの余白は rem トークン。
+7. レスポンシブの分岐は 768px の一点のみ（min-width:768px / max-width:767px）。
+
+================================================================
+3. デザイントークン（CSS 変数, すべて :root）
+================================================================
+
+テーマを変えたいときは :root でこれらを上書きする。
+
+色（ベース）:
+  --bg: #ffffff                         ページ・サーフェス背景
+  --surface-tint: rgba(0,0,0,0.03)      薄い面の塗り（カード/バッジ/通知の地）
+  --border: #000000                     既定の境界線
+  --border-focus: rgba(180,120,200,0.7) フォーカス時の境界線/リング
+色（テキスト）:
+  --text: #1a1a1a                       本文
+  --text-sub: #666666                   補足・キャプション
+  --text-muted: #999999                 プレースホルダ・無効
+色（アクセント）:
+  --accent: #c87ddb                     主要アクセント
+  --accent-2: #e8a0f0                   明るい派生
+  --accent-dark: #9a4fbf                暗い派生（リンクホバー等）
+色（状態）:
+  --danger: #d9534f                     エラー・警告・破壊的操作
+  --success: #4caf7d                    成功
+色（リンク）:
+  --link-hover: var(--accent-dark)      アンカーのホバー色
+余白（rem）:
+  --space-xs: 0.25rem  --space-sm: 0.5rem  --space-md: 1rem  --space-lg: 1.5rem  --space-xl: 2rem
+角丸:
+  --radius: 0.5rem      ボタン・入力欄・既定
+  --radius-lg: 0.75rem  カード等の大きめサーフェス
+フォント:
+  --font: 'IBM Plex Sans JP', sans-serif
+レイアウト:
+  --container-max: 960px  .container の最大幅
+
+コンポーネント局所上書き用の変数（その要素に style や class で渡す）:
+  --stack-gap  --cluster-gap  --card-gap  --card-pad  --list-gap  --icon-gap  --icon-size
+
+================================================================
+4. ベース要素（クラス不要で効く）
+================================================================
+
+- body: --font / --text / --bg、font-weight 400。
+- h1=2rem, h2=1.5rem, h3=1.2rem（いずれも weight 600）。見出し・段落の margin は 0。
+- a: テキスト色を継承し下線なし。hover で --link-hover。
+- code / pre: monospace。--surface-tint の面で囲い、角丸は --radius。
+- line-height はグローバルに設定しない（ブラウザ既定）。詰まり/空きが問題な要素だけ局所上書き。
+
+================================================================
+5. コンポーネント一覧（クラスとマークアップ）
+================================================================
+
+--- タイポグラフィ ---
+.site-title      サイトタイトル。weight600 / letter-spacing .02em / 1.4rem 固定。
+                 "KAWAII-MUSIC<span>.</span>X" の形。'.' は <span> に分け accent 色になる。
+.h2--hero        ページ最上位の見出し用に h2 を 1.6rem へ。
+.text-sub        補足色（--text-sub）。
+.text-muted      無効色（--text-muted）。
+.text-accent / .text-success / .text-danger   文字に該当色を当てる。
+
+例:
+    <h1 class="site-title">KAWAII-MUSIC<span>.</span>MOE</h1>
+
+--- レイアウト ---
+.container   中央寄せ・最大幅(--container-max)・左右 padding。ページ全体の枠。
+.stack       縦積み。子の間隔を gap で取る（既定 --space-md）。--stack-gap で上書き。
+.cluster     横並び（折り返しあり, align-items:center）。既定 gap --space-sm。--cluster-gap で上書き。
+
+例:
+    <div class="container stack">
+      <div class="cluster"> ... </div>
+    </div>
+
+--- カード（card） ---
+.card            縦 flex + gap のコンテナ。既定は枠線も塗りもなし（余白で見せる）。
+.card--bordered  1px 枠線（構造的に独立して見せたいとき）。
+.card--strong    3px 枠線（特に強い独立性が要るときのみ）。
+.card--tint      --surface-tint の面（一覧で軽くまとめたいとき）。
+.card--lg        角丸 --radius-lg・padding --space-lg（大きめサーフェス）。
+.card--dense     padding/gap を --space-sm に詰める。
+.card--raised    薄い影で軽く浮かせる（一覧中のみ）。
+注意: 枠線か面はどちらか一方だけ。カードをネストしない。
+
+例:
+    <div class="card card--bordered">
+      <h3>タイトル</h3>
+      <p>本文。段落の margin は 0、間隔は親の gap。</p>
+    </div>
+
+--- リスト（list） ---
+.list           ul/ol のマーカーを消し、縦並び + gap（既定 --space-sm）。--list-gap で上書き。
+.list--divided  項目間に薄い下線（最後の項目には出ない）。明示的に分けたいときだけ。
+.list--nav      768px 以上で横並びに切り替わるナビ用。
+.list 内の <a>  自動で flex + align-items:center + gap 0.4em になる。
+
+例:
+    <ul class="list list--divided">
+      <li>項目 1</li>
+      <li>項目 2</li>
+    </ul>
+
+--- アイコン + テキスト（icon） ---
+.icon-text   インライン flex + align-items:center。アイコンと文字を並べる。
+.icon        アイコン要素。色は currentColor を継承、サイズは 1em。
+             大きくしたいときだけ style="--icon-size: 1.5rem" で上書き。
+アイコン本体は Material Symbols 等を別途読み込む。色は周囲のテキストを継承させる。
+
+例:
+    <span class="icon-text">
+      <span class="material-symbols-outlined icon">favorite</span>
+      お気に入り
+    </span>
+
+--- フォーム（form） ---
+.input / .textarea / .select   入力コントロール。角丸 --radius、フォーカスで --border-focus のリング。
+.input--error 等                枠線を --danger に。
+.field                          「ラベル → コントロール → 補助テキスト」の縦まとまり（gap --space-xs）。
+.label                          ラベル（weight 500）。
+.field__hint                    補助テキスト（--text-sub, 小さめ）。
+.field__error                   エラーテキスト（--danger, 小さめ）。
+.check                          チェックボックス/ラジオ + ラベルの横並び。ネイティブ要素に accent 色。
+.fieldset (+ <legend>)          関連入力のまとまり。枠で囲わず legend + 余白で表現。
+
+例:
+    <div class="field">
+      <label class="label" for="name">名前</label>
+      <input class="input" id="name" type="text" placeholder="kawaii">
+      <p class="field__hint">表示名に使われます。</p>
+    </div>
+    <label class="check"><input type="checkbox"> 同意する</label>
+
+--- ボタン（button） ---
+.btn           既定（1px 枠線 + 透明背景）。hover で accent 系へ。
+.btn--primary  --accent の塗り。画面内で最も押させたい 1 つだけに使う。
+.btn--danger   --danger の塗り（削除など）。
+.btn--ghost    枠線・背景なしの控えめなボタン。
+disabled / aria-disabled="true"  無効表示。
+優先度は「塗り」で示す。枠線を増やして優先度を表現しない。
+
+例:
+    <button class="btn btn--primary">保存</button>
+    <button class="btn">キャンセル</button>
+
+--- バッジ / タグ（badge） ---
+.badge           小さなラベル。既定は --surface-tint の面、角丸 --radius（pill にはしない）。
+.badge--accent   --accent の塗り。
+.badge--success / .badge--danger  状態色の塗り。
+.badge--outline  枠線のみ。
+注意: 1 箇所に多色のバッジを並べない。基本は中立、強調が要る 1 つだけ色を付ける。
+
+例:
+    <span class="badge">Future Bass</span>
+    <span class="badge badge--accent">NEW</span>
+
+--- 通知 / メッセージ（notice） ---
+.notice           面（--surface-tint）+ 左 3px のバーで状態を示すメッセージブロック。
+.notice--info     バーを --accent に。
+.notice--success  バーを --success に。
+.notice--danger   バーを --danger に。
+内部はアイコン + テキスト。状態色はアイコン/文字に .text-* で添えてもよい。
+
+例:
+    <div class="notice notice--success">
+      <span class="material-symbols-outlined icon text-success">check_circle</span>
+      <p>保存しました。</p>
+    </div>
+
+================================================================
+6. やってはいけないこと（アンチパターン）
+================================================================
+
+- カードの中にカードを入れる（.card の中に .card）。→ 見出し + 本文に並べ直す。
+- 区切りに border / hr を多用する。→ まず .stack / gap の余白で分ける。
+- 縦の間隔を margin-top/bottom で作る。→ 親を .stack / .card / .list にして gap で取る。
+- 色・余白・角丸を生の値で直書き（color:#c87ddb / padding:16px / border-radius:8px）。→ var(--accent) / var(--space-md) / var(--radius)。
+- アイコンサイズを px や % で指定。→ em か rem（--icon-size 経由）。
+- カードに枠線と面の両方を付ける。→ どちらか一方。
+- 主要ボタン（.btn--primary）を 1 画面に複数置く。→ 主役は 1 つ、他は .btn か .btn--ghost。
+- 独自の line-height をグローバルに設定。→ 既定のまま、必要な要素だけ局所上書き。
+- 768px 以外のブレイクポイントを足す。→ 分岐は 768px のみ。
+
+================================================================
+7. 最小テンプレート
+================================================================
+
+    <!DOCTYPE html>
+    <html lang="ja">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@300;400;500;600;700&display=swap">
+      <link rel="stylesheet" href="https://akizakura.pages.dev/akizakura.css">
+    </head>
+    <body>
+      <div class="container stack">
+        <h1 class="site-title">KAWAII-MUSIC<span>.</span>MOE</h1>
+        <div class="card card--bordered">
+          <h3>はじめに</h3>
+          <p>余白と並びで構造を伝えます。</p>
+          <div class="cluster">
+            <button class="btn btn--primary">保存</button>
+            <button class="btn">キャンセル</button>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>

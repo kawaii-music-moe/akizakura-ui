@@ -1,0 +1,3 @@
+# Cloudflare Pages リライト/リダイレクト
+# CSS を内部の src/ から配布用のクリーンな URL で配る（200 = リライト・URL は変えない）
+/akizakura.css   /src/akizakura.css   200

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Akizakura — 1 枚で完結する軽量 UI フレームワーク</title>
+  <meta name="description"
+    content="Akizakura は kawaii-music.moe のデザイン規則を 1 枚の CSS にまとめた軽量 UI フレームワーク。余白で構造を作り、線を最小限にする。">
+
+  <!-- 本文フォント: IBM Plex Sans JP（typography.md）。CSS には含めず HTML 側で読み込む -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@300;400;500;600;700&display=swap">
+  <!-- アイコン: Material Symbols（icon.md の最優先ソース） -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
+  <link rel="stylesheet" href="src/akizakura.css">
+
+  <style>
+    /* ランディング専用の最小限の調整のみ */
+    body {
+      padding-block: var(--space-xl);
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: var(--space-md);
+    }
+
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+    }
+
+    .hero h1 {
+      font-size: 2.4rem;
+    }
+
+    .lead {
+      font-size: 1.1rem;
+      color: var(--text-sub);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container stack" style="--stack-gap: var(--space-xl)">
+
+    <!-- ヘッダー -->
+    <header class="cluster" style="justify-content: space-between;">
+      <h1 class="site-title">Akizakura<span>.</span>css</h1>
+      <nav>
+        <ul class="list list--nav">
+          <li><a href="demo.html">デモ</a></li>
+          <li><a href="llms.txt">LLM ガイド</a></li>
+          <li><a href="src/akizakura.css">CSS</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <!-- ヒーロー -->
+    <section class="stack hero">
+      <h1>余白で構造を作る、<br>1 枚で完結する UI フレームワーク</h1>
+      <p class="lead">
+        Akizakura は <a href="https://kawaii-music.moe" class="text-accent">kawaii-music.moe</a>
+        のデザイン規則を 1 枚の CSS にまとめた軽量フレームワークです。
+        線を最小限にし、近接と余白で情報のまとまりを伝えます。
+      </p>
+      <div class="cluster">
+        <a class="btn btn--primary" href="demo.html">
+          <span class="material-symbols-outlined icon">visibility</span>
+          デモを見る
+        </a>
+        <a class="btn" href="src/akizakura.css" download>
+          <span class="material-symbols-outlined icon">download</span>
+          CSS を入手
+        </a>
+        <a class="btn btn--ghost" href="llms-full.txt">LLM 向け完全ガイド</a>
+      </div>
+    </section>
+
+    <!-- 特徴 -->
+    <section class="stack">
+      <h2>特徴</h2>
+      <div class="feature-grid">
+        <div class="card card--tint">
+          <h3>1 枚で完結</h3>
+          <p>依存ゼロ。<code>&lt;link&gt;</code> 1 行で全コンポーネントが使えます。</p>
+        </div>
+        <div class="card card--tint">
+          <h3>デザイントークン</h3>
+          <p>色・余白・角丸はすべて CSS 変数。<code>:root</code> を上書きすればテーマを差し替えられます。</p>
+        </div>
+        <div class="card card--tint">
+          <h3>余白で構造を作る</h3>
+          <p>区切り線は最後の手段。近接と余白でまとまりを表現する設計思想です。</p>
+        </div>
+        <div class="card card--tint">
+          <h3>レスポンシブは 768px 一点</h3>
+          <p>ブレイクポイントは 1 つだけ。考えることを減らし、破綻を防ぎます。</p>
+        </div>
+        <div class="card card--tint">
+          <h3>アクセシブルなフォーカス</h3>
+          <p>入力・ボタンに統一したフォーカスリング。キーボード操作でも迷いません。</p>
+        </div>
+        <div class="card card--tint">
+          <h3>LLM フレンドリー</h3>
+          <p><code>llms.txt</code> を同梱。生成 AI に正しいマークアップを書かせられます。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- クイックスタート -->
+    <section class="stack">
+      <h2>クイックスタート</h2>
+      <p>HTML の <code>&lt;head&gt;</code> に以下を追加します（URL は自分の公開先に置き換えてください）。</p>
+      <pre><code>&lt;link rel="preconnect" href="https://fonts.googleapis.com"&gt;
+&lt;link rel="preconnect" href="https://fonts.gstatic.com" crossorigin&gt;
+&lt;link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@300;400;500;600;700&amp;display=swap"&gt;
+&lt;link rel="stylesheet" href="https://akizakura.pages.dev/akizakura.css"&gt;</code></pre>
+      <p>あとはクラスを当てるだけです。</p>
+      <pre><code>&lt;div class="container stack"&gt;
+  &lt;div class="card card--bordered"&gt;
+    &lt;h3&gt;カード&lt;/h3&gt;
+    &lt;p&gt;余白と並びで構造を伝えます。&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;button class="btn btn--primary"&gt;保存&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+    </section>
+
+    <!-- 設計原則 -->
+    <section class="stack">
+      <h2>設計原則</h2>
+      <ul class="list list--divided">
+        <li><strong>カードをネストさせない。</strong> 階層化したくなったら見出し + 本文に並べ直す。</li>
+        <li><strong>区切る線は最小限にする。</strong> まず余白で構造が読めないかを考える。</li>
+        <li><strong>区切りは並びから感じさせる。</strong> 近接・余白で「自然にまとまりが分かる」状態を目指す。</li>
+      </ul>
+    </section>
+
+    <!-- LLM で使う -->
+    <section class="stack">
+      <h2>LLM で使う</h2>
+      <div class="notice notice--info">
+        <span class="material-symbols-outlined icon text-accent">smart_toy</span>
+        <p>
+          生成 AI にこのフレームワークでマークアップを書かせるときは、
+          <a href="llms-full.txt" class="text-accent">llms-full.txt</a>
+          をコンテキストに渡してください。全トークン・全コンポーネント・設計原則を 1 ファイルにまとめています。
+        </p>
+      </div>
+    </section>
+
+    <!-- フッター -->
+    <footer class="stack" style="--stack-gap: var(--space-sm)">
+      <hr style="border: none; border-top: 1px solid rgba(0,0,0,0.1); width: 100%;">
+      <p class="text-sub">
+        デザイン規則の原典はリポジトリの <code>design-doc/</code>。
+        kawaii-music.moe のために作られています。
+      </p>
+    </footer>
+
+  </div>
+</body>
+
+</html>

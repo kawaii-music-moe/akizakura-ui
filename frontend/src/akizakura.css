@@ -1,0 +1,498 @@
+/* =============================================================
+   akizakura.css — Akizakura
+   kawaii-music.moe のデザイン規則（design-doc/）を 1 枚で完結させた
+   軽量 UI フレームワーク。
+
+   最優先方針（design-doc/layout.md）:
+     1. カードをネストさせない
+     2. 区切る線は最小限にする（まず余白で構造を作る）
+     3. 区切りは目（線）ではなく並び（近接・余白）から感じさせる
+
+   使い方:
+     <link rel="stylesheet" href="akizakura.css">
+
+   フォント（IBM Plex Sans JP）はこの CSS には含めない。
+   レンダリングをブロックしないよう、利用側の HTML <head> で読み込むこと
+   （typography.md / 実例は frontend/demo.html）:
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+     <link rel="stylesheet"
+           href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@300;400;500;600;700&display=swap">
+   ============================================================= */
+
+/* -------------------------------------------------------------
+   1. トークン（design-doc/color, typography, spacing, shape）
+   色・余白・角丸・フォントは必ずここ経由で参照する。
+   ------------------------------------------------------------- */
+:root {
+  /* --- フォント（typography.md） --- */
+  --font: 'IBM Plex Sans JP', sans-serif;
+
+  /* --- 色: ベース（color.md） --- */
+  --bg: #ffffff;
+  --surface-tint: rgba(0, 0, 0, 0.03);
+  --border: #000000;
+  --border-focus: rgba(180, 120, 200, 0.7);
+
+  /* --- 色: テキスト --- */
+  --text: #1a1a1a;
+  --text-sub: #666666;
+  --text-muted: #999999;
+
+  /* --- 色: アクセント --- */
+  --accent: #c87ddb;
+  --accent-2: #e8a0f0;
+  --accent-dark: #9a4fbf;
+
+  /* --- 色: 状態 --- */
+  --danger: #d9534f;
+  --success: #4caf7d;
+
+  /* --- 色: リンク --- */
+  --link-hover: var(--accent-dark);
+
+  /* --- 余白スケール（spacing.md） 単位は rem --- */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+
+  /* --- 角丸（shape.md） --- */
+  --radius: 0.5rem;
+  --radius-lg: 0.75rem;
+
+  /* --- レイアウト補助（design-doc では未規定。フレームワーク用の調整値） --- */
+  --container-max: 960px;
+}
+
+/* -------------------------------------------------------------
+   2. ベース / リセット
+   margin を子要素ごとに積まず、間隔は親の gap で取る方針
+   （card.md / list.md）に合わせ、見出し・段落の margin を 0 にする。
+   ------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-weight: 400;
+  color: var(--text);
+  background: var(--bg);
+  /* line-height はブラウザ既定をそのまま使う（typography.md） */
+}
+
+h1, h2, h3, h4, h5, h6,
+p, figure, blockquote {
+  margin: 0;
+}
+
+img, svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* -------------------------------------------------------------
+   3. タイポグラフィ（typography.md）
+   ------------------------------------------------------------- */
+h1 { font-size: 2rem;   font-weight: 600; }
+h2 { font-size: 1.5rem; font-weight: 600; }
+h3 { font-size: 1.2rem; font-weight: 600; }
+
+/* ページ最上位の見出しを特に強調したい場合 */
+.h2--hero { font-size: 1.6rem; }
+
+/* 補足テキスト / キャプション */
+.text-sub   { color: var(--text-sub); }
+.text-muted { color: var(--text-muted); }
+
+/* --- リンク（アンカー） --- */
+a {
+  color: currentColor;
+  text-decoration: none;
+}
+a:hover {
+  color: var(--link-hover);
+}
+
+/* --- サイトタイトル（ヘッダー） ---
+   マークアップ例: <h1 class="site-title">KAWAII-MUSIC<span>.</span>MOE</h1>
+   '.' は単独の <span> に分け accent 色を当てる。 */
+.site-title {
+  font-family: var(--font);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  font-size: 1.4rem;     /* 見出しスケールから独立した固定値 */
+}
+.site-title span {
+  color: var(--accent);
+}
+
+/* --- コード（専用フォントは入れず monospace フォールバックのみ。typography.md）
+   線ではなく面（--surface-tint）で軽く囲う（layout.md）。 */
+code, kbd, samp, pre {
+  font-family: monospace;
+}
+code {
+  font-size: 0.9em;
+  padding: 0.1em 0.3em;
+  border-radius: var(--radius);
+  background: var(--surface-tint);
+}
+pre {
+  padding: var(--space-md);
+  border-radius: var(--radius);
+  background: var(--surface-tint);
+  overflow-x: auto;
+}
+pre code {
+  padding: 0;
+  font-size: inherit;
+  background: none;
+}
+
+/* -------------------------------------------------------------
+   4. レイアウト補助
+   「並びと余白で構造を作る」方針を支えるための最小限のユーティリティ。
+   ------------------------------------------------------------- */
+
+/* 中央寄せのページ幅コンテナ */
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--space-md);
+}
+
+/* 縦積み: margin を積まず gap で間隔を取る。--stack-gap で上書き可。 */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--stack-gap, var(--space-md));
+}
+
+/* 横並び（折り返しあり）: アイコン群・タグ・ボタン列など。 */
+.cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cluster-gap, var(--space-sm));
+}
+
+/* -------------------------------------------------------------
+   5. カード（card.md / layout.md）
+   - 縦方向の flex + gap で内部を組む（子の margin を積まない）。
+   - 区切りは「枠線」か「面（薄い塗り）」のどちらか一方のみ。
+   - 既定は枠線も塗りも持たない素のサーフェス（余白で見せる）。
+   - 影は標準では使わない。
+   ------------------------------------------------------------- */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--card-gap, var(--space-md));
+  padding: var(--card-pad, var(--space-md));
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+
+/* 大きめサーフェス（ページ最上位の囲いなど） */
+.card--lg {
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+}
+
+/* 密度を上げたいとき */
+.card--dense {
+  --card-pad: var(--space-sm);
+  --card-gap: var(--space-sm);
+}
+
+/* 区切り: 枠線（構造的に独立した存在として見せたいとき） */
+.card--bordered { border: 1px solid var(--border); }
+
+/* 特に強い独立性を持たせたい場合に限り太線 */
+.card--strong   { border: 3px solid var(--border); }
+
+/* 区切り: 面（一覧の中で軽くまとまりを示したいとき） */
+.card--tint     { background: var(--surface-tint); }
+
+/* 一覧中で軽く浮き上がらせたいときのみ。直下に薄くにじむ程度の弱い影。 */
+.card--raised {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* カード内の段落間隔は親の gap で揃える（段落自身の margin は 0） */
+.card > p { margin: 0; }
+
+/* -------------------------------------------------------------
+   6. リスト（list.md / layout.md）
+   - <ul>/<ol> のマーカーを消し、間隔は gap で取る。
+   - 区切りは「余白のみ」を第一候補。下線は補助。
+   ------------------------------------------------------------- */
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--list-gap, var(--space-sm));
+}
+
+/* 項目を明示的に分けたいときだけ下線を足す。
+   線は薄く（不透明度 0.2 前後）。最後のアイテムには出さない。 */
+.list--divided > li:not(:last-child) {
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+/* ナビゲーション等で幅に応じて縦↔横を切り替える（breakpoint.md: 768px）。
+   既定（mobile, <768px）は縦並び。 */
+.list--nav { gap: var(--space-md); }
+@media (min-width: 768px) {
+  .list--nav {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+}
+
+/* アイテムがリンクの場合、アンカー自体に flex を当てて中身をまとめてよい */
+.list a {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+/* -------------------------------------------------------------
+   7. アイコン + テキスト（icon.md）
+   - 並びは flex + align-items:center。
+   - アイコンと文字の隙間は親フォントサイズ連動のため em で指定（0.2em〜0.5em）。
+   - アイコンサイズは利用側で原則指定しない。上書きは --icon-size 経由を優先。
+   - 色は周囲のテキスト色を継承する。
+   ------------------------------------------------------------- */
+.icon-text {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--icon-gap, 0.4em);
+}
+
+/* アイコン単体を大きく見せたい場合のサイズ指定の受け口。
+   利用側で style="--icon-size: 1.5rem" のように渡す。 */
+.icon {
+  font-size: var(--icon-size, 1em);
+  line-height: 1;
+  color: currentColor;
+}
+
+/* -------------------------------------------------------------
+   8. フォーム（form.md / shape.md）
+   - フィールドは「ラベル → コントロール → 補助テキスト」の縦積みを gap で組む。
+   - コントロールの角丸は --radius、フォーカスは --border-focus。
+   ------------------------------------------------------------- */
+.input,
+.textarea,
+.select {
+  font-family: var(--font);
+  font-size: 1rem;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-sm) var(--space-md);
+  width: 100%;
+}
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--text-muted);
+}
+.input:focus,
+.textarea:focus,
+.select:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--border-focus);
+}
+
+/* エラー状態 */
+.input--error,
+.textarea--error,
+.select--error {
+  border-color: var(--danger);
+}
+
+/* ラベル + コントロール + 補助テキストのまとまり */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+.label {
+  font-weight: 500;
+  color: var(--text);
+}
+.field__hint  { font-size: 0.85rem; color: var(--text-sub); }
+.field__error { font-size: 0.85rem; color: var(--danger); }
+
+/* チェックボックス / ラジオ: ネイティブ要素に accent 色を当て、
+   ラベルと横並びにする（隙間は親フォント連動の em）。 */
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  cursor: pointer;
+}
+.check input[type='checkbox'],
+.check input[type='radio'] {
+  accent-color: var(--accent);
+  width: 1em;
+  height: 1em;
+  margin: 0;
+}
+
+/* 関連する入力のまとまり。枠線で囲わず legend（見出し相当）+ 余白で表現する（layout.md）。 */
+.fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+.fieldset > legend {
+  padding: 0;
+  font-weight: 500;
+}
+
+/* -------------------------------------------------------------
+   9. ボタン（button.md）
+   角丸は --radius。優先度は塗りで示し、枠線を増やさない。
+   ------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  font-family: var(--font);
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-sm) var(--space-md);
+  cursor: pointer;
+  transition: color 0.15s, background-color 0.15s, border-color 0.15s;
+}
+.btn:hover {
+  border-color: var(--accent);
+  color: var(--accent-dark);
+}
+.btn:focus-visible {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--border-focus);
+}
+
+/* 主要アクション: アクセント塗り */
+.btn--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+}
+.btn--primary:hover {
+  background: var(--accent-dark);
+  border-color: var(--accent-dark);
+  color: var(--bg);
+}
+
+/* 破壊的アクション */
+.btn--danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: var(--bg);
+}
+
+/* 枠線のない控えめなボタン（line を持たない選択肢） */
+.btn--ghost {
+  border-color: transparent;
+  background: transparent;
+}
+
+.btn:disabled,
+.btn[aria-disabled='true'] {
+  color: var(--text-muted);
+  border-color: var(--text-muted);
+  background: var(--bg);
+  cursor: not-allowed;
+}
+
+/* -------------------------------------------------------------
+   10. バッジ / タグ（badge.md）
+   小さなラベル（ジャンルタグ・状態表示など）。
+   区切りは塗り（面）を基本にし、角丸は --radius に揃える（pill にはしない）。
+   ------------------------------------------------------------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1;
+  padding: 0.3em 0.6em;
+  /* 枠線ありの派生（--outline）と高さ・内寸を揃えるため、既定でも透明な
+     枠線分の領域を確保する（box-sizing:border-box で内寸がズレるのを防ぐ） */
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: var(--surface-tint);
+  color: var(--text);
+}
+.badge--accent  { background: var(--accent);  color: var(--bg); }
+.badge--danger  { background: var(--danger);  color: var(--bg); }
+.badge--success { background: var(--success); color: var(--bg); }
+
+/* 面を使いたくない場面の控えめな表示 */
+.badge--outline {
+  background: transparent;
+  border-color: var(--border);
+}
+
+/* -------------------------------------------------------------
+   11. 通知 / メッセージ（notice.md）
+   面（surface-tint）でまとまりを作り、状態は左の細いバーの色で示す。
+   状態を色で伝える必要があるための、線の例外的な使用（layout.md）。
+   ------------------------------------------------------------- */
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border-radius: var(--radius);
+  background: var(--surface-tint);
+  border-left: 3px solid var(--text-muted);
+  /* アイコンと本文 1 行目を揃えるため局所的に行高を固定する（typography.md） */
+  line-height: 1.5;
+}
+/* アイコンの行高を本文に合わせ、グリフを 1 行目の中央に置く
+   （既定の .icon { line-height: 1 } を上書き） */
+.notice > .icon {
+  line-height: inherit;
+}
+.notice--info    { border-left-color: var(--accent); }
+.notice--success { border-left-color: var(--success); }
+.notice--danger  { border-left-color: var(--danger); }
+
+/* -------------------------------------------------------------
+   12. 状態テキスト（color.md の状態色）
+   ------------------------------------------------------------- */
+.text-danger  { color: var(--danger); }
+.text-success { color: var(--success); }
+.text-accent  { color: var(--accent); }

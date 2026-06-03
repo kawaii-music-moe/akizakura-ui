@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 — Akizakura</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
+  <link rel="stylesheet" href="/src/akizakura.css">
+
+  <style>
+    body { padding-block: var(--space-xl); }
+    .material-symbols-outlined { font-family: 'Material Symbols Outlined'; }
+    .error-code { font-size: 4rem; font-weight: 600; color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="container stack" style="--stack-gap: var(--space-lg)">
+    <header>
+      <h1 class="site-title">Akizakura<span>.</span>css</h1>
+    </header>
+
+    <section class="stack">
+      <p class="error-code">404</p>
+      <h2>ページが見つかりません</h2>
+      <p class="text-sub">お探しのページは存在しないか、移動した可能性があります。</p>
+      <div class="cluster">
+        <a class="btn btn--primary" href="/">
+          <span class="material-symbols-outlined icon">home</span>
+          トップへ戻る
+        </a>
+        <a class="btn" href="/demo">デモを見る</a>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

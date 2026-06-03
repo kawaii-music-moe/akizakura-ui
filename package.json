@@ -1,0 +1,13 @@
+{
+  "name": "akizakura",
+  "version": "0.1.0",
+  "description": "Akizakura — kawaii-music.moe のデザイン規則を 1 枚にまとめた軽量 CSS UI フレームワーク",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler pages dev frontend",
+    "deploy": "wrangler pages deploy frontend --project-name akizakura"
+  },
+  "devDependencies": {
+    "wrangler": "^4"
+  }
+}

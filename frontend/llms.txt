@@ -1,0 +1,28 @@
+# Akizakura
+
+> Akizakura は kawaii-music.moe のデザイン規則を 1 枚の CSS にまとめた軽量 UI フレームワーク。依存ゼロ・トークン駆動。「線を最小限にし、余白と近接で構造を伝える」ことを最優先の設計思想とする。
+
+このサイトは UI フレームワーク本体（CSS）と、その利用ガイドを配信している。HTML にクラスを当てるだけで使える。フォント（IBM Plex Sans JP）と任意のアイコンフォント（Material Symbols）は利用側の HTML で読み込む。
+
+## 最優先の原則
+
+- カードをネストさせない。階層化したいときは見出し + 本文に並べ直す。
+- 区切る線（border / hr / 下線）は最小限。まず余白（gap）で構造を表現する。
+- 縦方向の間隔は margin を積まず、親要素の gap（.stack / .card / .list）で取る。
+- 色・余白・角丸は必ず CSS 変数（トークン）経由で参照し、生の値を直書きしない。
+- レスポンシブの分岐は 768px の一点のみ。
+
+## ドキュメント
+
+- [完全リファレンス（LLM 向け）](llms-full.txt): 全トークン・全コンポーネント・マークアップ例・アンチパターンを 1 ファイルに収録。生成時はこれをコンテキストに渡す。
+- [デモ](demo.html): 全コンポーネントの実物プレビュー。
+- [CSS 本体](akizakura.css): フレームワークの配布ファイル。
+
+## 読み込み方
+
+HTML の <head> に以下を追加する:
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://akizakura.pages.dev/akizakura.css">
