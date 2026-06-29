@@ -16,6 +16,13 @@
 - フォーカス時は枠線を [`--border-focus`](color.md) に変え、同色の薄いリングを添える。
 - エラー状態は枠線を `--danger` にする。
 
+## 見た目の変種（Material 由来）
+
+既定の `.input` / `.textarea` / `.select` は「枠線（outlined）」。スマホアプリ向けに次の変種を用意する。いずれも上の共通方針（トークン参照・フォーカス色）は保つ。
+
+- **filled（`--filled`）**: 面（[`--surface-tint`](color.md)）で囲い、下辺だけ 1px の線。フォーカスで下辺を太く（[`--border-focus`](color.md)）。リングは出さない。
+- **floating label（`.field--floating`）**: ラベルがコントロール内から枠上へ上がる。マークアップは「コントロール → ラベル」の順、`placeholder=" "`（空白）を入れて空かどうかを `:placeholder-shown` で判定する。挙動は CSS のみで完結し JS 不要。
+
 ## チェックボックス / ラジオ
 
 - ネイティブ要素を使い、`accent-color` に [`--accent`](color.md) を当てる。独自の作り込みはしない。

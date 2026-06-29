@@ -37,11 +37,14 @@ HTML にクラスを当てるだけで使える。JS は不要。
 
 テーマを変えたいときは :root でこれらを上書きする。
 
+以下の値はライト（既定）。ダークの値は「3b. ダークモード」を参照。
+
 色（ベース）:
   --bg: #ffffff                         ページ・サーフェス背景
   --surface-tint: rgba(0,0,0,0.03)      薄い面の塗り（カード/バッジ/通知の地）
   --border: #000000                     既定の境界線
   --border-focus: rgba(180,120,200,0.7) フォーカス時の境界線/リング
+  --divider: rgba(0,0,0,0.2)            薄い区切り線（--border より淡い。リストの下線等）
 色（テキスト）:
   --text: #1a1a1a                       本文
   --text-sub: #666666                   補足・キャプション
@@ -60,6 +63,8 @@ HTML にクラスを当てるだけで使える。JS は不要。
 角丸:
   --radius: 0.5rem      ボタン・入力欄・既定
   --radius-lg: 0.75rem  カード等の大きめサーフェス
+影:
+  --shadow-card: 0 1px 4px rgba(0,0,0,0.08)  .card--raised 等の弱い影（テーマ連動）
 フォント:
   --font: 'IBM Plex Sans JP', sans-serif
 レイアウト:
@@ -67,6 +72,44 @@ HTML にクラスを当てるだけで使える。JS は不要。
 
 コンポーネント局所上書き用の変数（その要素に style や class で渡す）:
   --stack-gap  --cluster-gap  --card-gap  --card-pad  --list-gap  --icon-gap  --icon-size
+
+================================================================
+3b. ダークモード
+================================================================
+
+ダークモードは標準対応。トークンの意味は変えず値だけが切り替わるので、
+利用側はトークンを使って組むだけでよい（マークアップにテーマ別の分岐は不要）。
+
+切り替えの条件:
+  - OS が dark のとき自動でダーク（@media (prefers-color-scheme: dark)）。
+  - 利用側が <html data-theme="light"> を付けたときだけライトに固定。
+  - <html data-theme="dark"> / data-theme="light" で OS 設定を明示的に上書き。
+
+ダーク時の値（ライトからの差分。上記以外のトークンはライトと同値）:
+  --bg: #09080f                         --surface-tint: rgba(255,255,255,0.04)
+  --border: #1f1c2d                     --border-focus: rgba(200,150,230,0.8)
+  --divider: rgba(255,255,255,0.14)
+  --text: #f2f0f7                       --text-sub: #a99fb8   --text-muted: #736a8b
+  --accent: #d59cea                     --accent-2: #ecb4f5   --accent-dark: #c87ddb
+  --link-hover: var(--accent-2)         --shadow-card: 0 1px 4px rgba(0,0,0,0.6)
+
+トグルを作る場合（任意。フレームワーク本体は JS 非依存。data-theme の付与・保存は
+利用側 JS の責務）、ちらつき防止に <head> で最初の描画前に保存値を反映する:
+
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("theme");
+          if (t === "dark" || t === "light")
+            document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
+
+theme-color メタも light/dark の 2 つを置くとアドレスバー等が馴染む:
+
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#09080f" media="(prefers-color-scheme: dark)">
 
 ================================================================
 4. ベース要素（クラス不要で効く）
@@ -197,6 +240,45 @@ disabled / aria-disabled="true"  無効表示。
       <p>保存しました。</p>
     </div>
 
+--- モバイル / アプリ系（Material 由来。見た目は akizakura 流＝フラット・固定角丸・pill 不可・弱い影のみ） ---
+共通: 位置取りは *--sticky / *--fixed の派生で opt-in。開閉/タイマー/ドラッグ等の挙動は利用側 JS。
+
+.icon-btn         枠も塗りもないアイコンだけのボタン（ナビのアクション等）。
+.app-bar          上部バー。先頭アクション→.app-bar__title→末尾アクション。区切りは下 1px。--sticky で上端固定。
+.bottom-nav       下部ナビ。.bottom-nav__item（アイコン上+ラベル下）を等幅。現在地は .is-active/aria-current="page"（accent）。--fixed で下端固定。
+.tabs / .tabs__tab  タブ。現在タブは .is-active/aria-selected="true"（accent の下線）。
+.fab              FAB。円形にせず角丸方形（--radius-lg）・accent 塗り・弱い影。.fab--extended でラベル付き、.fab--fixed で右下固定。
+.switch           スイッチ。<label> 内に input[checkbox] → .switch__track>.switch__thumb の順。on で accent。トラックは pill にしない。
+.segmented / .segmented__item  連結トグル。選択は .is-active/aria-pressed="true"（accent 塗り）。
+.snackbar         一時メッセージ。.snackbar__text + .snackbar__action（accent 文字ボタン）。--fixed で下中央に浮かせる。
+.dialog           ネイティブ <dialog> に当てる。.dialog__title / .dialog__actions（右寄せ）。背面は ::backdrop=--scrim。開閉は showModal()。
+.bottom-sheet     下からのシート。先頭に .bottom-sheet__handle。上端だけ大きめ角丸。--fixed で下端固定。
+.chip             badge の対話版。選択は .is-selected/aria-pressed="true"（accent）。.chip--outline は枠線のみ。.chip__remove で × を添える。
+.input--filled 等  テキスト入力の filled 変種（面+下線）。
+.field--floating  ラベル浮上。マークアップは「入力→ラベル」の順、入力に placeholder=" " が必須。
+
+例（スイッチ / チップ / ダイアログ）:
+    <label class="switch">
+      <input type="checkbox" checked>
+      <span class="switch__track"><span class="switch__thumb"></span></span>
+      通知を受け取る
+    </label>
+
+    <button class="chip is-selected" aria-pressed="true">Future Bass</button>
+    <!-- 選択は色（accent 塗り）だけで示す。選択時にアイコンを足さない（寸法が変わるため）。 -->
+
+    <dialog class="dialog" id="d">
+      <form method="dialog" class="stack">
+        <h2 class="dialog__title">削除しますか？</h2>
+        <p class="text-sub">この操作は取り消せません。</p>
+        <div class="cluster dialog__actions">
+          <button class="btn btn--ghost" value="cancel">キャンセル</button>
+          <button class="btn btn--danger" value="delete">削除</button>
+        </div>
+      </form>
+    </dialog>
+    <!-- 開く: document.getElementById('d').showModal()（利用側 JS） -->
+
 ================================================================
 6. やってはいけないこと（アンチパターン）
 ================================================================
@@ -210,6 +292,10 @@ disabled / aria-disabled="true"  無効表示。
 - 主要ボタン（.btn--primary）を 1 画面に複数置く。→ 主役は 1 つ、他は .btn か .btn--ghost。
 - 独自の line-height をグローバルに設定。→ 既定のまま、必要な要素だけ局所上書き。
 - 768px 以外のブレイクポイントを足す。→ 分岐は 768px のみ。
+- FAB を円形に、switch / chip を pill（完全な丸）にする。→ 角丸は --radius / --radius-lg の固定トークンに揃える。
+- 浮く要素（FAB/snackbar/dialog/sheet）を強い影や暗い反転面で立体化。→ --bg + 枠線 + 弱い --shadow-card に留める。
+- ダイアログを div で自作する。→ ネイティブ <dialog> + .dialog に当て、showModal() を使う。
+- ナビ/シート等の位置を基底クラスに直書き。→ *--sticky / *--fixed の派生で opt-in。
 
 ================================================================
 7. 最小テンプレート

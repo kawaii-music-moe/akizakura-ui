@@ -7,6 +7,19 @@
   <title>Akizakura — 1 枚で完結する軽量 UI フレームワーク</title>
   <meta name="description"
     content="Akizakura は kawaii-music.moe のデザイン規則を 1 枚の CSS にまとめた軽量 UI フレームワーク。余白で構造を作り、線を最小限にする。">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#09080f" media="(prefers-color-scheme: dark)">
+
+  <!-- 最初の描画前に保存済みテーマを反映してちらつきを防ぐ -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("theme");
+        if (t === "dark" || t === "light")
+          document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
 
   <!-- 本文フォント: IBM Plex Sans JP（typography.md）。CSS には含めず HTML 側で読み込む -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -50,14 +63,20 @@
     <!-- ヘッダー -->
     <header class="cluster" style="justify-content: space-between;">
       <h1 class="site-title">Akizakura<span>.</span>css</h1>
-      <nav>
-        <ul class="list list--nav">
-          <li><a href="demo.html">デモ</a></li>
-          <li><a href="llms.txt">LLM ガイド</a></li>
-          <li><a href="src/akizakura.css">CSS</a></li>
-          <li><a href="https://github.com/Suki-9/akizakura-ui">GitHub</a></li>
-        </ul>
-      </nav>
+      <div class="cluster">
+        <nav>
+          <ul class="list list--nav">
+            <li><a href="demo.html">デモ</a></li>
+            <li><a href="llms.txt">LLM ガイド</a></li>
+            <li><a href="src/akizakura.css">CSS</a></li>
+            <li><a href="https://github.com/Suki-9/akizakura-ui">GitHub</a></li>
+          </ul>
+        </nav>
+        <button class="btn btn--ghost theme-toggle" type="button"
+          aria-label="テーマを切り替え" title="ライト / ダークを切り替え">
+          <span class="material-symbols-outlined icon">dark_mode</span>
+        </button>
+      </div>
     </header>
 
     <!-- ヒーロー -->
@@ -160,7 +179,7 @@
 
     <!-- フッター -->
     <footer class="stack" style="--stack-gap: var(--space-sm)">
-      <hr style="border: none; border-top: 1px solid rgba(0,0,0,0.1); width: 100%;">
+      <hr style="border: none; border-top: 1px solid var(--divider); width: 100%;">
       <p class="text-sub">
         デザイン規則の原典はリポジトリの <code>design-doc/</code>。
         kawaii-music.moe のために作られています。
@@ -172,6 +191,33 @@
     </footer>
 
   </div>
+
+  <!-- テーマ切り替え（フレームワーク本体は JS 非依存。これはランディング用の最小トグル） -->
+  <script>
+    (function () {
+      var btn = document.querySelector(".theme-toggle");
+      if (!btn) return;
+      var icon = btn.querySelector(".icon");
+      var root = document.documentElement;
+      var mq = window.matchMedia("(prefers-color-scheme: dark)");
+      function effective() {
+        var attr = root.getAttribute("data-theme");
+        if (attr === "dark" || attr === "light") return attr;
+        return mq.matches ? "dark" : "light";
+      }
+      function sync() {
+        if (icon) icon.textContent = effective() === "dark" ? "light_mode" : "dark_mode";
+      }
+      btn.addEventListener("click", function () {
+        var next = effective() === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", next);
+        try { localStorage.setItem("theme", next); } catch (e) {}
+        sync();
+      });
+      mq.addEventListener("change", sync);
+      sync();
+    })();
+  </script>
 </body>
 
 </html>

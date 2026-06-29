@@ -4,6 +4,8 @@
 
 このサイトは UI フレームワーク本体（CSS）と、その利用ガイドを配信している。HTML にクラスを当てるだけで使える。フォント（IBM Plex Sans JP）と任意のアイコンフォント（Material Symbols）は利用側の HTML で読み込む。
 
+基本コンポーネント（card / list / form / button / badge / notice / icon）に加え、スマホアプリ向けのモバイル系（app-bar / bottom-nav / tabs / fab / switch / segmented / chip / snackbar / dialog / bottom-sheet / テキスト入力の filled・floating 変種）も含む。いずれも Material Design の「型」を akizakura の方針（フラット・固定角丸・pill 不可・弱い影のみ）に翻訳したもの。一覧と例は llms-full.txt を参照。
+
 ## 最優先の原則
 
 - カードをネストさせない。階層化したいときは見出し + 本文に並べ直す。
@@ -11,6 +13,7 @@
 - 縦方向の間隔は margin を積まず、親要素の gap（.stack / .card / .list）で取る。
 - 色・余白・角丸は必ず CSS 変数（トークン）経由で参照し、生の値を直書きしない。
 - レスポンシブの分岐は 768px の一点のみ。
+- ダークモードは標準対応。トークンが OS 設定（prefers-color-scheme）と `<html data-theme>` に連動して切り替わるので、利用側はトークンを使うだけでよい。詳細は llms-full.txt の「ダークモード」を参照。
 
 ## ドキュメント
 

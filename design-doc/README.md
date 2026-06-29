@@ -28,8 +28,15 @@ kawaii-music.moe のデザインルールを言語化・蓄積するためのデ
 
 - [card.md](card.md) — カードコンポーネントの方針
 - [list.md](list.md) — リストコンポーネントの方針
-- [form.md](form.md) — フォーム（入力・選択・チェック）の方針
+- [form.md](form.md) — フォーム（入力・選択・チェック・変種）の方針
 - [button.md](button.md) — ボタンの方針（種類・優先度・フォーカス）
 - [badge.md](badge.md) — バッジ / タグの方針
+- [chip.md](chip.md) — チップ（選択・フィルタ・入力タグ）の方針
 - [notice.md](notice.md) — 通知 / メッセージの方針
 - [icon.md](icon.md) — アイコンの方針（ソースの使い分け・サイズ・色）
+
+### モバイル / アプリ系コンポーネント
+
+- [navigation.md](navigation.md) — アプリバー / 下部ナビ / タブの方針
+- [action.md](action.md) — FAB / スイッチ / セグメント / アイコンボタンの方針
+- [feedback.md](feedback.md) — スナックバー / ダイアログ / ボトムシートの方針

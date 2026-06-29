@@ -25,6 +25,9 @@
    色・余白・角丸・フォントは必ずここ経由で参照する。
    ------------------------------------------------------------- */
 :root {
+  /* 既定はライト。ダークは下の「1b. ダークテーマ」で切り替える（color.md） */
+  color-scheme: light;
+
   /* --- フォント（typography.md） --- */
   --font: 'IBM Plex Sans JP', sans-serif;
 
@@ -33,6 +36,8 @@
   --surface-tint: rgba(0, 0, 0, 0.03);
   --border: #000000;
   --border-focus: rgba(180, 120, 200, 0.7);
+  /* 余白だけでは足りないときの薄い区切り線（list.md）。--border より淡い。 */
+  --divider: rgba(0, 0, 0, 0.2);
 
   /* --- 色: テキスト --- */
   --text: #1a1a1a;
@@ -62,8 +67,72 @@
   --radius: 0.5rem;
   --radius-lg: 0.75rem;
 
+  /* --- 影（card.md: 弱い影のみ。テーマ連動で dark では少し濃くする） --- */
+  --shadow-card: 0 1px 4px rgba(0, 0, 0, 0.08);
+
+  /* --- オーバーレイの暗幕（dialog / bottom-sheet の背面） --- */
+  --scrim: rgba(0, 0, 0, 0.45);
+
   /* --- レイアウト補助（design-doc では未規定。フレームワーク用の調整値） --- */
   --container-max: 960px;
+}
+
+/* -------------------------------------------------------------
+   1b. ダークテーマ（color.md）
+   - OS が dark のときは自動で適用する。利用側が明示的に
+     [data-theme="light"] を付けたときだけ light に固定する。
+   - 明示トグルは <html data-theme="dark"> / [data-theme="light"] で上書きできる。
+   - data-theme の付与・保存（localStorage 等）は利用側 JS の責務。
+     この CSS はその状態に「応答するだけ」で JS 依存は持たない。
+   - 値の出典は kawaii-music.moe 本体（portfolio）のダークパレット。
+   - 下の 2 ブロックはトークン値を必ず同一に保つ（CSS にミックスインが無いため複製）。
+   ------------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+
+    --bg: #09080f;
+    --surface-tint: rgba(255, 255, 255, 0.04);
+    --border: #1f1c2d;
+    --border-focus: rgba(200, 150, 230, 0.8);
+    --divider: rgba(255, 255, 255, 0.14);
+
+    --text: #f2f0f7;
+    --text-sub: #a99fb8;
+    --text-muted: #736a8b;
+
+    --accent: #d59cea;
+    --accent-2: #ecb4f5;
+    --accent-dark: #c87ddb;
+
+    --link-hover: var(--accent-2);
+
+    --shadow-card: 0 1px 4px rgba(0, 0, 0, 0.6);
+    --scrim: rgba(0, 0, 0, 0.6);
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #09080f;
+  --surface-tint: rgba(255, 255, 255, 0.04);
+  --border: #1f1c2d;
+  --border-focus: rgba(200, 150, 230, 0.8);
+  --divider: rgba(255, 255, 255, 0.14);
+
+  --text: #f2f0f7;
+  --text-sub: #a99fb8;
+  --text-muted: #736a8b;
+
+  --accent: #d59cea;
+  --accent-2: #ecb4f5;
+  --accent-dark: #c87ddb;
+
+  --link-hover: var(--accent-2);
+
+  --shadow-card: 0 1px 4px rgba(0, 0, 0, 0.6);
+  --scrim: rgba(0, 0, 0, 0.6);
 }
 
 /* -------------------------------------------------------------
@@ -98,6 +167,13 @@ p, figure, blockquote {
 img, svg {
   display: block;
   max-width: 100%;
+}
+
+/* HTML の hidden 属性を常に効かせる。flex 表示のコンポーネント
+   （.snackbar / .bottom-sheet 等）に hidden を付けたとき、コンポーネント側の
+   display 指定に負けて隠れない事故を防ぐ。 */
+[hidden] {
+  display: none !important;
 }
 
 /* -------------------------------------------------------------
@@ -224,9 +300,10 @@ pre code {
 /* 区切り: 面（一覧の中で軽くまとまりを示したいとき） */
 .card--tint     { background: var(--surface-tint); }
 
-/* 一覧中で軽く浮き上がらせたいときのみ。直下に薄くにじむ程度の弱い影。 */
+/* 一覧中で軽く浮き上がらせたいときのみ。直下に薄くにじむ程度の弱い影。
+   影はテーマ連動トークン（--shadow-card）。dark でも見えるよう値が切り替わる。 */
 .card--raised {
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-card);
 }
 
 /* カード内の段落間隔は親の gap で揃える（段落自身の margin は 0） */
@@ -250,7 +327,7 @@ pre code {
    線は薄く（不透明度 0.2 前後）。最後のアイテムには出さない。 */
 .list--divided > li:not(:last-child) {
   padding-bottom: var(--space-sm);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid var(--divider);
 }
 
 /* ナビゲーション等で幅に応じて縦↔横を切り替える（breakpoint.md: 768px）。
@@ -384,6 +461,11 @@ pre code {
   font-size: 1rem;
   font-weight: 500;
   line-height: 1;
+  /* バッジと同じ理由（IBM Plex Sans JP の descent でラテン文字が上寄りに見える）。
+     テキストボックスを cap〜baseline にトリムして光学的に中央化する。
+     テキストのみが動きアイコン（.icon 子要素）は巻き込まない。 */
+  text-box-trim: trim-both;
+  text-box-edge: cap alphabetic;
   color: var(--text);
   background: var(--bg);
   border: 1px solid var(--border);
@@ -447,6 +529,12 @@ pre code {
   font-size: 0.8rem;
   font-weight: 500;
   line-height: 1;
+  /* IBM Plex Sans JP は descent が大きく、line-height:1 のタイトな箱では
+     ラテン文字が中央より上に寄って見える。テキストボックスを cap〜baseline に
+     トリムして光学的に中央へ揃える。アイコン等は巻き込まない（padding 調整と違い
+     テキストだけが動く）。未対応ブラウザでは単に無視され、従来表示にフォールバック。 */
+  text-box-trim: trim-both;
+  text-box-edge: cap alphabetic;
   padding: 0.3em 0.6em;
   /* 枠線ありの派生（--outline）と高さ・内寸を揃えるため、既定でも透明な
      枠線分の領域を確保する（box-sizing:border-box で内寸がズレるのを防ぐ） */
@@ -496,3 +584,425 @@ pre code {
 .text-danger  { color: var(--danger); }
 .text-success { color: var(--success); }
 .text-accent  { color: var(--accent); }
+
+/* =============================================================
+   13〜19. モバイル / アプリ系コンポーネント
+   Material Design 由来の「型」を、akizakura の方針（線は最小・余白で
+   構造・角丸は --radius 系の固定トークン・pill にしない・影は弱い
+   --shadow-card のみ・elevation で立体を作らない）に翻訳して実装する。
+   位置取り（sticky / fixed）は基底クラスに持たせず *--fixed / *--sticky
+   の派生で opt-in（レイアウトを押し付けない）。開閉やタイマー等の挙動は
+   利用側 JS の責務（CSS はその状態に応答するだけ）。
+   ============================================================= */
+
+/* -------------------------------------------------------------
+   13. アイコンボタン（icon-btn）
+   ナビ等で使う、枠も塗りもない素のアイコンだけのボタン。
+   ------------------------------------------------------------- */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xs);
+  color: inherit;
+  background: none;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  --icon-size: 1.5rem;
+  transition: color 0.15s, background-color 0.15s;
+}
+.icon-btn:hover {
+  color: var(--link-hover);
+  background: var(--surface-tint);
+}
+.icon-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--border-focus);
+}
+
+/* -------------------------------------------------------------
+   14. アプリバー / 下部ナビ / タブ（ナビ系）
+   ------------------------------------------------------------- */
+
+/* 上部アプリバー: 先頭アクション → タイトル → 末尾アクション。
+   区切りは下 1px のみ（layout.md: 線は最小）。 */
+.app-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.app-bar__title {
+  flex: 1;
+  min-width: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  /* 1 行で省略 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.app-bar--sticky {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* 下部ナビ: アイコン＋ラベルを等幅で並べ、現在地は accent。 */
+.bottom-nav {
+  display: flex;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+.bottom-nav__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
+  color: var(--text-sub);
+  font-size: 0.75rem;
+  --icon-size: 1.5rem;
+  transition: color 0.15s;
+}
+.bottom-nav__item:hover { color: var(--link-hover); }
+.bottom-nav__item.is-active,
+.bottom-nav__item[aria-current='page'] { color: var(--accent); }
+.bottom-nav--fixed {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 10;
+}
+
+/* タブ: 現在タブを accent の下線で示す（状態を色で伝えるための線の例外）。
+   下線以外の区切りは置かず、間隔は gap で取る。 */
+.tabs {
+  display: flex;
+  gap: var(--space-md);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+.tabs__tab {
+  appearance: none;
+  flex-shrink: 0;
+  font: inherit;
+  font-weight: 500;
+  color: var(--text-sub);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px; /* コンテナ下線に重ねる */
+  padding: var(--space-sm) var(--space-xs);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.tabs__tab:hover { color: var(--link-hover); }
+.tabs__tab.is-active,
+.tabs__tab[aria-selected='true'] {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* -------------------------------------------------------------
+   15. FAB（フローティングアクションボタン）
+   円形にはせず、角丸は --radius-lg（Material 3 も角丸方形）。
+   accent 塗り＋弱い影。位置は --fixed で opt-in。
+   ------------------------------------------------------------- */
+.fab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  padding: var(--space-md);
+  font: inherit;
+  font-weight: 500;
+  color: var(--bg);
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+  --icon-size: 1.5rem;
+  text-box-trim: trim-both;
+  text-box-edge: cap alphabetic;
+  transition: background-color 0.15s;
+}
+.fab:hover { background: var(--accent-dark); }
+.fab:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--border-focus);
+}
+/* ラベル付き（extended）: 横に文字を添える。 */
+.fab--extended { padding: var(--space-md) var(--space-lg); }
+.fab--fixed {
+  position: fixed;
+  right: var(--space-lg);
+  bottom: var(--space-lg);
+  z-index: 20;
+}
+
+/* -------------------------------------------------------------
+   16. スイッチ / セグメント（アクション系トグル）
+   ------------------------------------------------------------- */
+
+/* スイッチ: ネイティブ checkbox を隠し、トラック＋つまみで表す。
+   トラックは pill にせず --radius の角丸矩形。on で accent 塗り。 */
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  cursor: pointer;
+}
+.switch > input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.switch__track {
+  position: relative;
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 1.25rem;
+  background: var(--text-muted);
+  border-radius: var(--radius);
+  transition: background-color 0.15s;
+}
+.switch__thumb {
+  position: absolute;
+  top: 50%;
+  left: 0.2rem;
+  width: 0.85rem;
+  height: 0.85rem;
+  background: var(--bg);
+  border-radius: calc(var(--radius) - 0.15rem);
+  transform: translateY(-50%);
+  transition: left 0.15s;
+}
+.switch > input:checked + .switch__track { background: var(--accent); }
+.switch > input:checked + .switch__track > .switch__thumb {
+  left: calc(100% - 0.85rem - 0.2rem);
+}
+.switch > input:focus-visible + .switch__track {
+  box-shadow: 0 0 0 3px var(--border-focus);
+}
+
+/* セグメント: 連結したトグル。外周だけ --radius、内側は 1px で仕切る。
+   選択は accent 塗りで示す（枠を増やさない）。 */
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.segmented__item {
+  appearance: none;
+  font: inherit;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--bg);
+  border: none;
+  border-left: 1px solid var(--border);
+  padding: var(--space-sm) var(--space-md);
+  cursor: pointer;
+  text-box-trim: trim-both;
+  text-box-edge: cap alphabetic;
+  transition: background-color 0.15s, color 0.15s;
+}
+.segmented__item:first-child { border-left: none; }
+.segmented__item:not(.is-active):not([aria-pressed='true']):hover {
+  background: var(--surface-tint);
+}
+.segmented__item.is-active,
+.segmented__item[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* -------------------------------------------------------------
+   17. スナックバー / ダイアログ / ボトムシート（フィードバック系）
+   いずれも「浮く」必然性がある要素。akizakura では暗い反転面にはせず、
+   --bg + 枠線 + 弱い影の浮遊サーフェスにする。
+   ------------------------------------------------------------- */
+
+/* スナックバー: 一時メッセージ＋任意のアクション。画面下に浮かせる場合は --fixed。 */
+.snackbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  line-height: 1.5;
+}
+.snackbar__text { flex: 1; }
+/* アクションは accent の文字ボタン（塗りを増やさない）。 */
+.snackbar__action {
+  flex-shrink: 0;
+  color: var(--accent);
+  font-weight: 600;
+}
+.snackbar--fixed {
+  position: fixed;
+  left: 50%;
+  bottom: var(--space-lg);
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 2 * var(--space-md));
+  z-index: 30;
+}
+
+/* ダイアログ: ネイティブ <dialog> に当てる。showModal() で中央表示。
+   背面は --scrim。開閉は利用側 JS（または <form method="dialog">）。 */
+.dialog {
+  width: 100%;
+  max-width: min(28rem, calc(100% - 2 * var(--space-lg)));
+  padding: var(--space-lg);
+  color: var(--text);
+  background: var(--bg);
+  border: none;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+.dialog::backdrop { background: var(--scrim); }
+.dialog__title { font-size: 1.2rem; font-weight: 600; }
+.dialog__actions { justify-content: flex-end; }
+
+/* ボトムシート: 下から せり上がる面。上端だけ大きめ角丸＋掴み handle。
+   実際の出し入れ（transform / 背面 scrim）は利用側で行う。 */
+.bottom-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-md) var(--space-lg);
+  background: var(--bg);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: var(--shadow-card);
+}
+.bottom-sheet__handle {
+  align-self: center;
+  width: 2rem;
+  height: 0.25rem;
+  margin-bottom: var(--space-xs);
+  background: var(--text-muted);
+  border-radius: var(--radius);
+}
+.bottom-sheet--fixed {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 30;
+}
+
+/* -------------------------------------------------------------
+   18. チップ（入力系・選択/フィルタ）
+   badge の対話版。面は --surface-tint、角丸 --radius（pill にしない）。
+   選択は accent 塗り。先頭アイコン・末尾の削除（×）を添えられる。
+   ------------------------------------------------------------- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
+  text-box-trim: trim-both;
+  text-box-edge: cap alphabetic;
+  padding: 0.4em 0.75em;
+  /* アイコン（先頭のチェックや末尾の×）の有無で高さが変わらないよう、
+     アイコン分の高さを常に確保する＝padding(0.4em×2)＋アイコン(1.1em)＋枠線(2px)。
+     これでテキストのみのチップとアイコン付きチップが同じ高さに揃う。 */
+  min-height: calc(1.9em + 2px);
+  color: var(--text);
+  background: var(--surface-tint);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+  --icon-size: 1.1em;
+  transition: color 0.15s, background-color 0.15s, border-color 0.15s;
+}
+.chip:hover { border-color: var(--accent); }
+.chip:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--border-focus);
+}
+.chip.is-selected,
+.chip[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+/* 面を使わない控えめなチップ */
+.chip--outline {
+  background: transparent;
+  border-color: var(--border);
+}
+/* チップ内の削除ボタン（×） */
+.chip__remove {
+  display: inline-flex;
+  margin-right: -0.2em; /* 末尾の余白を詰める */
+  padding: 0;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.7;
+  --icon-size: 1.05em;
+}
+.chip__remove:hover { opacity: 1; }
+
+/* -------------------------------------------------------------
+   19. テキストフィールド変種（入力系）
+   既定の .input/.textarea/.select は「枠線（outlined）」。ここでは
+   「塗り（filled）」と「ラベル浮上（floating label）」を足す。
+   ------------------------------------------------------------- */
+
+/* filled: 面で囲い、下辺だけ線。フォーカスで下辺を太く accent 寄りに。 */
+.input--filled,
+.textarea--filled,
+.select--filled {
+  background: var(--surface-tint);
+  border: none;
+  border-bottom: 1px solid var(--border);
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.input--filled:focus,
+.textarea--filled:focus,
+.select--filled:focus {
+  box-shadow: none;
+  border-bottom: 2px solid var(--border-focus);
+}
+
+/* floating label: ラベルがコントロール内から枠上へ上がる。
+   マークアップは「コントロール → ラベル」の順、placeholder=" "（空白）必須。 */
+.field--floating {
+  position: relative;
+  display: block;
+}
+.field--floating > .label {
+  position: absolute;
+  top: 50%;
+  left: var(--space-md);
+  transform: translateY(-50%);
+  padding-inline: 0.25em;
+  color: var(--text-muted);
+  background: var(--bg);
+  pointer-events: none;
+  transition: top 0.15s, color 0.15s, font-size 0.15s;
+}
+.field--floating > .input:focus + .label,
+.field--floating > .input:not(:placeholder-shown) + .label,
+.field--floating > .select:focus + .label,
+.field--floating > .select + .label {
+  top: 0;
+  font-size: 0.75rem;
+  color: var(--accent);
+}
+/* filled の上に floating label を載せる場合は、面の色に合わせる */
+.field--floating > .input--filled + .label { background: var(--surface-tint); }

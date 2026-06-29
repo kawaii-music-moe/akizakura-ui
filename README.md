@@ -3,6 +3,8 @@
 Akizakura は kawaii-music.moe のデザイン規則を **1 枚の CSS** にまとめた、依存ゼロの軽量 UI フレームワーク。
 「線を最小限にし、余白と近接で構造を伝える」ことを最優先の設計思想とする。
 
+ダークモードに標準対応。トークンが OS 設定（`prefers-color-scheme`）と `<html data-theme>` に連動して切り替わるので、利用側はトークンを使って組むだけでよい（詳細は [`design-doc/color.md`](design-doc/color.md) のダークモード節）。
+
 - デザイン規則の原典: [`design-doc/`](design-doc/)
 - フレームワーク本体: [`frontend/src/akizakura.css`](frontend/src/akizakura.css)
 - 配信サイト一式: [`frontend/`](frontend/)（Cloudflare Pages の公開ルート）

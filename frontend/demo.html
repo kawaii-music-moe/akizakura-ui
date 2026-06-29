@@ -5,6 +5,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Akizakura デモ</title>
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#09080f" media="(prefers-color-scheme: dark)">
+
+  <!-- 最初の描画前に保存済みテーマを反映してちらつきを防ぐ（ダークモードの実演用） -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("theme");
+        if (t === "dark" || t === "light")
+          document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+
   <!-- 本文フォント: IBM Plex Sans JP（typography.md）。CSS には含めず HTML 側で読み込む -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,7 +50,7 @@
       width: 100%;
       height: 3rem;
       border-radius: var(--radius);
-      border: 1px solid rgba(0, 0, 0, 0.1);
+      border: 1px solid var(--divider);
     }
 
     .swatch-grid {
@@ -54,6 +68,29 @@
     .material-symbols-outlined {
       font-family: 'Material Symbols Outlined';
     }
+
+    /* ボトムシートの開閉（せり上げ＋背面 scrim）はデモ側で付ける。
+       akizakura 本体は .bottom-sheet / --fixed の見た目だけを提供する。 */
+    .sheet-scrim {
+      position: fixed;
+      inset: 0;
+      z-index: 29;
+      background: var(--scrim);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+    .sheet-scrim.is-open {
+      opacity: 1;
+      visibility: visible;
+    }
+    #demo-sheet {
+      transform: translateY(100%);
+      transition: transform 0.25s ease;
+    }
+    #demo-sheet.is-open {
+      transform: translateY(0);
+    }
   </style>
 </head>
 
@@ -63,20 +100,34 @@
     <!-- ヘッダー / サイトタイトル -->
     <header class="cluster" style="justify-content: space-between;">
       <h1 class="site-title"><a href="index.html">Akizakura<span>.</span>css</a></h1>
-      <nav>
-        <ul class="list list--nav">
-          <li><a href="#color">Color</a></li>
-          <li><a href="#typography">Typography</a></li>
-          <li><a href="#card">Card</a></li>
-          <li><a href="#list">List</a></li>
-          <li><a href="#icon">Icon</a></li>
-          <li><a href="#form">Form</a></li>
-          <li><a href="#button">Button</a></li>
-          <li><a href="#badge">Badge</a></li>
-          <li><a href="#notice">Notice</a></li>
-          <li><a href="#code">Code</a></li>
-        </ul>
-      </nav>
+      <div class="cluster">
+        <nav>
+          <ul class="list list--nav">
+            <li><a href="#color">Color</a></li>
+            <li><a href="#typography">Typography</a></li>
+            <li><a href="#card">Card</a></li>
+            <li><a href="#list">List</a></li>
+            <li><a href="#icon">Icon</a></li>
+            <li><a href="#form">Form</a></li>
+            <li><a href="#button">Button</a></li>
+            <li><a href="#badge">Badge</a></li>
+            <li><a href="#notice">Notice</a></li>
+            <li><a href="#code">Code</a></li>
+            <li><a href="#appbar">App bar</a></li>
+            <li><a href="#tabs">Tabs</a></li>
+            <li><a href="#nav">Nav</a></li>
+            <li><a href="#chip">Chips</a></li>
+            <li><a href="#toggle">Toggle</a></li>
+            <li><a href="#fab">FAB</a></li>
+            <li><a href="#feedback">Feedback</a></li>
+            <li><a href="#fields">Fields</a></li>
+          </ul>
+        </nav>
+        <button class="btn btn--ghost theme-toggle" type="button"
+          aria-label="テーマを切り替え" title="ライト / ダークを切り替え">
+          <span class="material-symbols-outlined icon">dark_mode</span>
+        </button>
+      </div>
     </header>
 
     <!-- カラー -->
@@ -107,7 +158,20 @@
           <div class="swatch" style="background: var(--surface-tint)"></div>
           <figcaption>--surface-tint</figcaption>
         </figure>
+        <figure>
+          <div class="swatch" style="background: var(--bg)"></div>
+          <figcaption>--bg</figcaption>
+        </figure>
+        <figure>
+          <div class="swatch" style="background: var(--text)"></div>
+          <figcaption>--text</figcaption>
+        </figure>
+        <figure>
+          <div class="swatch" style="background: var(--border)"></div>
+          <figcaption>--border</figcaption>
+        </figure>
       </div>
+      <p class="text-sub">右上のアイコンでライト / ダークを切り替えられます（OS 設定にも追従）。</p>
     </section>
 
     <!-- タイポグラフィ -->
@@ -267,7 +331,338 @@
 }</code></pre>
     </section>
 
+    <!-- ===== モバイル / アプリ系コンポーネント ===== -->
+    <section class="stack">
+      <h2 class="h2--hero">モバイル / アプリ系</h2>
+      <p class="text-sub">Material Design の「型」を akizakura の方針（フラット・固定角丸・pill にしない・弱い影のみ）に翻訳したコンポーネント。位置取り（sticky / fixed）は <code>*--sticky</code> / <code>*--fixed</code> で opt-in。開閉やタイマー等の挙動は利用側 JS の責務。</p>
+    </section>
+
+    <!-- アプリバー -->
+    <section class="stack" id="appbar">
+      <h2>App bar</h2>
+      <header class="app-bar" style="border: 1px solid var(--border); border-radius: var(--radius);">
+        <button class="icon-btn" aria-label="メニュー"><span class="material-symbols-outlined icon">menu</span></button>
+        <span class="app-bar__title">ページタイトル</span>
+        <button class="icon-btn" aria-label="検索"><span class="material-symbols-outlined icon">search</span></button>
+        <button class="icon-btn" aria-label="その他"><span class="material-symbols-outlined icon">more_vert</span></button>
+      </header>
+      <p class="text-sub">先頭アクション → タイトル → 末尾アクション。区切りは下 1px のみ。実画面では <code>app-bar--sticky</code> で上端固定。</p>
+    </section>
+
+    <!-- タブ -->
+    <section class="stack" id="tabs">
+      <h2>Tabs</h2>
+      <div class="tabs" role="tablist" data-tabs>
+        <button class="tabs__tab is-active" role="tab" aria-selected="true" data-tab="ov">概要</button>
+        <button class="tabs__tab" role="tab" aria-selected="false" data-tab="sp">仕様</button>
+        <button class="tabs__tab" role="tab" aria-selected="false" data-tab="rv">レビュー</button>
+      </div>
+      <div>
+        <p data-panel="ov">概要：余白と並びで構造を伝える、依存ゼロの軽量 UI フレームワークです。</p>
+        <p data-panel="sp" hidden>仕様：1 枚の CSS。色・余白・角丸はすべてトークンで管理します。</p>
+        <p data-panel="rv" hidden>レビュー：「線が少なくて読みやすい」と好評です。</p>
+      </div>
+      <p class="text-sub">タブをクリックすると現在タブ（accent の下線）と内容が切り替わります。切替の挙動はこのデモの JS。</p>
+    </section>
+
+    <!-- 下部ナビ -->
+    <section class="stack" id="nav">
+      <h2>Bottom navigation</h2>
+      <nav class="bottom-nav" style="border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;">
+        <a class="bottom-nav__item is-active" aria-current="page"><span class="material-symbols-outlined icon">home</span>ホーム</a>
+        <a class="bottom-nav__item"><span class="material-symbols-outlined icon">search</span>さがす</a>
+        <a class="bottom-nav__item"><span class="material-symbols-outlined icon">favorite</span>お気に入り</a>
+        <a class="bottom-nav__item"><span class="material-symbols-outlined icon">person</span>マイページ</a>
+      </nav>
+      <p class="text-sub">アイコン＋ラベルを等幅で。現在地は accent。実画面では <code>bottom-nav--fixed</code> で下端固定。</p>
+    </section>
+
+    <!-- チップ -->
+    <section class="stack" id="chip">
+      <h2>Chips</h2>
+      <p class="text-sub">badge の対話版。角丸は <code>--radius</code>（pill にしない）。選択は accent 塗り。</p>
+      <div class="cluster">
+        <button class="chip" aria-pressed="false">House</button>
+        <button class="chip is-selected" aria-pressed="true">Future Bass</button>
+        <button class="chip" aria-pressed="false">Kawaii House</button>
+        <button class="chip chip--outline">J-Core</button>
+        <span class="chip">タグ<button class="chip__remove" aria-label="削除"><span class="material-symbols-outlined icon">close</span></button></span>
+      </div>
+    </section>
+
+    <!-- スイッチ / セグメント -->
+    <section class="stack" id="toggle">
+      <h2>Switch &amp; Segmented</h2>
+      <div class="cluster" style="--cluster-gap: var(--space-lg)">
+        <label class="switch"><input type="checkbox" checked><span class="switch__track"><span class="switch__thumb"></span></span>通知を受け取る</label>
+        <label class="switch"><input type="checkbox"><span class="switch__track"><span class="switch__thumb"></span></span>公開する</label>
+        <div class="segmented" role="group" aria-label="期間">
+          <button class="segmented__item is-active" aria-pressed="true">日</button>
+          <button class="segmented__item" aria-pressed="false">週</button>
+          <button class="segmented__item" aria-pressed="false">月</button>
+        </div>
+      </div>
+      <p class="text-sub">スイッチのトラックは pill にせず <code>--radius</code> の角丸矩形。セグメントは外周だけ角丸、選択は accent 塗り。</p>
+    </section>
+
+    <!-- FAB -->
+    <section class="stack" id="fab">
+      <h2>FAB</h2>
+      <div class="cluster">
+        <button class="fab" aria-label="追加"><span class="material-symbols-outlined icon">add</span></button>
+        <button class="fab fab--extended"><span class="material-symbols-outlined icon">edit</span>作成</button>
+      </div>
+      <p class="text-sub">円形にはせず角丸方形（<code>--radius-lg</code>）。accent 塗り＋弱い影。実画面では <code>fab--fixed</code> で右下に浮かせる。</p>
+    </section>
+
+    <!-- フィードバック -->
+    <section class="stack" id="feedback">
+      <h2>Snackbar / Dialog / Bottom sheet</h2>
+
+      <h3>Snackbar</h3>
+      <div class="snackbar" style="max-width: 26rem;">
+        <span class="snackbar__text">保存しました。</span>
+        <button class="btn btn--ghost snackbar__action" data-dismiss>取消</button>
+      </div>
+      <div class="cluster">
+        <button class="btn" id="show-snackbar">スナックバーを表示</button>
+      </div>
+
+      <h3>Dialog</h3>
+      <div class="cluster">
+        <button class="btn" id="open-dialog">ダイアログを開く</button>
+      </div>
+      <dialog class="dialog" id="demo-dialog">
+        <form method="dialog" class="stack">
+          <h2 class="dialog__title">削除しますか？</h2>
+          <p class="text-sub">この操作は取り消せません。</p>
+          <div class="cluster dialog__actions">
+            <button class="btn btn--ghost" value="cancel">キャンセル</button>
+            <button class="btn btn--danger" value="delete">削除</button>
+          </div>
+        </form>
+      </dialog>
+
+      <h3>Bottom sheet</h3>
+      <div class="bottom-sheet" style="max-width: 26rem; border: 1px solid var(--border);">
+        <div class="bottom-sheet__handle"></div>
+        <h3>共有</h3>
+        <ul class="list">
+          <li><a href="#feedback"><span class="material-symbols-outlined icon">link</span>リンクをコピー</a></li>
+          <li><a href="#feedback"><span class="material-symbols-outlined icon">share</span>他のアプリで共有</a></li>
+        </ul>
+      </div>
+      <div class="cluster">
+        <button class="btn" id="open-sheet">シートを開く</button>
+      </div>
+      <p class="text-sub">いずれも <code>--bg</code> + 枠線 + 弱い影の浮遊サーフェス。Dialog はネイティブ <code>&lt;dialog&gt;</code>、背面は <code>--scrim</code>。せり上げ・背面 scrim はこのデモの JS / CSS で付けている（フレームワーク本体は CSS のみ）。</p>
+    </section>
+
+    <!-- テキストフィールド変種 -->
+    <section class="stack" id="fields">
+      <h2>Text field variants</h2>
+      <div class="stack" style="max-width: 24rem;">
+        <div class="field">
+          <label class="label" for="tf-outlined">outlined（既定）</label>
+          <input class="input" id="tf-outlined" placeholder="kawaii">
+        </div>
+        <div class="field">
+          <label class="label" for="tf-filled">filled</label>
+          <input class="input input--filled" id="tf-filled" placeholder="kawaii">
+        </div>
+        <label class="field--floating">
+          <input class="input" placeholder=" ">
+          <span class="label">floating label</span>
+        </label>
+      </div>
+      <p class="text-sub">既定の <code>.input</code> は outlined。<code>--filled</code> で面、<code>.field--floating</code> でラベルが枠上へ浮上（マークアップは「入力 → ラベル」の順、<code>placeholder=" "</code> 必須）。</p>
+    </section>
+
   </div>
+
+  <!-- 開閉する実体（デモ用）。本体は .bottom-sheet / --fixed の見た目だけを提供する。 -->
+  <div class="sheet-scrim" id="sheet-scrim" hidden></div>
+  <div class="bottom-sheet bottom-sheet--fixed" id="demo-sheet" style="max-width: 30rem; margin-inline: auto;" hidden>
+    <div class="bottom-sheet__handle"></div>
+    <h3>共有</h3>
+    <ul class="list">
+      <li><a href="#feedback"><span class="material-symbols-outlined icon">link</span>リンクをコピー</a></li>
+      <li><a href="#feedback"><span class="material-symbols-outlined icon">share</span>他のアプリで共有</a></li>
+    </ul>
+    <div class="cluster" style="justify-content: flex-end;">
+      <button class="btn btn--ghost" data-close-sheet>閉じる</button>
+    </div>
+  </div>
+
+  <!-- テーマ切り替え（フレームワーク本体は JS 非依存。これはデモ用の最小トグル） -->
+  <script>
+    (function () {
+      var btn = document.querySelector(".theme-toggle");
+      if (!btn) return;
+      var icon = btn.querySelector(".icon");
+      var root = document.documentElement;
+      var mq = window.matchMedia("(prefers-color-scheme: dark)");
+      function effective() {
+        var attr = root.getAttribute("data-theme");
+        if (attr === "dark" || attr === "light") return attr;
+        return mq.matches ? "dark" : "light";
+      }
+      function sync() {
+        if (icon) icon.textContent = effective() === "dark" ? "light_mode" : "dark_mode";
+      }
+      btn.addEventListener("click", function () {
+        var next = effective() === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", next);
+        try { localStorage.setItem("theme", next); } catch (e) {}
+        sync();
+      });
+      mq.addEventListener("change", sync);
+      sync();
+    })();
+  </script>
+
+  <!-- コンポーネントの挙動（akizakura 本体は CSS のみ。挙動はこうした利用側 JS で付ける例） -->
+  <script>
+    (function () {
+      // ---- タブ: 現在タブと内容を切り替える ----
+      document.querySelectorAll("[data-tabs]").forEach(function (group) {
+        var scope = group.parentElement;
+        group.addEventListener("click", function (e) {
+          var tab = e.target.closest(".tabs__tab");
+          if (!tab || !group.contains(tab)) return;
+          group.querySelectorAll(".tabs__tab").forEach(function (t) {
+            var on = t === tab;
+            t.classList.toggle("is-active", on);
+            t.setAttribute("aria-selected", on ? "true" : "false");
+          });
+          var key = tab.getAttribute("data-tab");
+          scope.querySelectorAll("[data-panel]").forEach(function (p) {
+            p.hidden = p.getAttribute("data-panel") !== key;
+          });
+        });
+      });
+
+      // ---- 下部ナビ: 現在地を切り替える ----
+      document.querySelectorAll(".bottom-nav").forEach(function (nav) {
+        nav.addEventListener("click", function (e) {
+          var item = e.target.closest(".bottom-nav__item");
+          if (!item || !nav.contains(item)) return;
+          e.preventDefault();
+          nav.querySelectorAll(".bottom-nav__item").forEach(function (it) {
+            var on = it === item;
+            it.classList.toggle("is-active", on);
+            if (on) it.setAttribute("aria-current", "page");
+            else it.removeAttribute("aria-current");
+          });
+        });
+      });
+
+      // ---- セグメント: 選択を切り替える ----
+      document.querySelectorAll(".segmented").forEach(function (group) {
+        group.addEventListener("click", function (e) {
+          var item = e.target.closest(".segmented__item");
+          if (!item || !group.contains(item)) return;
+          group.querySelectorAll(".segmented__item").forEach(function (it) {
+            var on = it === item;
+            it.classList.toggle("is-active", on);
+            it.setAttribute("aria-pressed", on ? "true" : "false");
+          });
+        });
+      });
+
+      // ---- チップ: 選択トグル（色のみ。サイズは変えない） / 削除 ----
+      document.addEventListener("click", function (e) {
+        var rm = e.target.closest(".chip__remove");
+        if (rm) {
+          var host = rm.closest(".chip");
+          if (host) host.remove();
+          return;
+        }
+        var chip = e.target.closest("button.chip");
+        if (chip) {
+          var on = !chip.classList.contains("is-selected");
+          chip.classList.toggle("is-selected", on);
+          chip.setAttribute("aria-pressed", on ? "true" : "false");
+        }
+      });
+
+      // ---- スナックバー: 表示 / 自動消滅 / 取消 ----
+      var current = null;
+      function showSnackbar(msg) {
+        if (current) current.remove();
+        var bar = document.createElement("div");
+        bar.className = "snackbar snackbar--fixed";
+        var text = document.createElement("span");
+        text.className = "snackbar__text";
+        text.textContent = msg;
+        var act = document.createElement("button");
+        act.className = "btn btn--ghost snackbar__action";
+        act.textContent = "閉じる";
+        act.addEventListener("click", function () { bar.remove(); current = null; });
+        bar.appendChild(text);
+        bar.appendChild(act);
+        document.body.appendChild(bar);
+        current = bar;
+        setTimeout(function () { if (current === bar) { bar.remove(); current = null; } }, 3500);
+      }
+      var showBtn = document.getElementById("show-snackbar");
+      if (showBtn) showBtn.addEventListener("click", function () { showSnackbar("保存しました。"); });
+      document.querySelectorAll("[data-dismiss]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var bar = b.closest(".snackbar");
+          if (bar) bar.hidden = true;
+        });
+      });
+
+      // ---- FAB: スナックバーを出す ----
+      document.querySelectorAll(".fab").forEach(function (fab) {
+        fab.addEventListener("click", function () {
+          showSnackbar(fab.classList.contains("fab--extended") ? "作成しました。" : "追加しました。");
+        });
+      });
+
+      // ---- ダイアログ: 開く / 結果を通知 ----
+      var openDialog = document.getElementById("open-dialog");
+      var dialog = document.getElementById("demo-dialog");
+      if (openDialog && dialog && typeof dialog.showModal === "function") {
+        openDialog.addEventListener("click", function () { dialog.showModal(); });
+        dialog.addEventListener("close", function () {
+          if (dialog.returnValue === "delete") showSnackbar("削除しました。");
+          else if (dialog.returnValue === "cancel") showSnackbar("キャンセルしました。");
+        });
+      }
+
+      // ---- ボトムシート: せり上げ / 背面 scrim で開閉 ----
+      var sheet = document.getElementById("demo-sheet");
+      var scrim = document.getElementById("sheet-scrim");
+      var openSheetBtn = document.getElementById("open-sheet");
+      function openSheet() {
+        sheet.hidden = false;
+        scrim.hidden = false;
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            sheet.classList.add("is-open");
+            scrim.classList.add("is-open");
+          });
+        });
+      }
+      function closeSheet() {
+        sheet.classList.remove("is-open");
+        scrim.classList.remove("is-open");
+        setTimeout(function () { sheet.hidden = true; scrim.hidden = true; }, 260);
+      }
+      if (openSheetBtn && sheet && scrim) {
+        openSheetBtn.addEventListener("click", openSheet);
+        scrim.addEventListener("click", closeSheet);
+        document.querySelectorAll("[data-close-sheet]").forEach(function (b) {
+          b.addEventListener("click", closeSheet);
+        });
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape" && sheet.classList.contains("is-open")) closeSheet();
+        });
+      }
+    })();
+  </script>
 </body>
 
 </html>
