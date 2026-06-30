@@ -1,4 +1,2 @@
-allowBuilds:
-  esbuild: set this to true or false
-  sharp: set this to true or false
-  workerd: set this to true or false
+# 単一パッケージ構成。ビルドスクリプトを持つ依存はないため packages は空でよい。
+packages: []
